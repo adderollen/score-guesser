@@ -1,0 +1,159 @@
+<body>
+
+
+</body>
+
+<template name="App_body">
+
+	{{#if questionsLoaded}}
+
+	{{> Template.dynamic template=main}}
+
+	{{> Template.dynamic template=content}}
+
+	{{else}}
+		<h1>Loading questions...</h1>
+	{{/if}}
+
+
+</template>
+
+<template name="welcome">
+	<div class="content">
+		<form id="new-game-form">
+			<h1>Start a new game!</h1>
+			<form id="new-game-form">
+				<input type="text" name="player-name" placeholder="Enter your name" required>
+				<input type="submit" name="new-game" value="Start new game!">
+			</form>
+			
+		</form>
+
+		<form id="enter-game-form">
+			<h2>Join an already existing game!</h2>
+			<input type="text" name="game-id" placeholder="Enter game-id" required>
+			<input type="submit" name="join-game" value="Join game">
+		</form>
+
+	<!--	<input type="button" class="test" value="Test" />-->
+	</div>
+	
+</template>
+
+<template name="game_screen">
+
+
+</template>
+
+<template name="lobby">
+	<div class="content">
+		<a class="back-button" href="/">Go back to Welcome page</a>
+
+		<h1>Welcome to the game lobby!</h1>
+
+		<h3>Game-link: <span>{{currentGameLink}}</span></h3>
+
+		{{#if isHost}}
+			<button class="start-game" id="start-game-button" disabled="{{waitingForPlayers}}">Start game</button>{{#if waitingForPlayers}}<span class="waiting-for-players">Waiting for players to get ready!</span>{{/if}}
+		{{/if}}
+
+		{{#if newPlayer}}
+			<form id="join-game-form">
+				<h3>You haven't joined this game yet, join it!</h3>
+				<input type="text" name="player-name" placeholder="Enter your name" required>
+				<input type="submit" name="join-game" value="Join game!">
+			</form>
+
+		{{else}}
+			<h3>Nice, you're in the game!</h3>
+			<label class="check">Are you ready?<input type="checkbox" name="ready-checkbox"> <div class="box"></div></label>
+		{{/if}}
+
+		
+		<h2>Players in this game:</h2>
+		{{#if playersInGame}}
+			<ul class="player-list">
+				{{#each playersInGame}}
+					<li><span class="player-name">{{name}}</span> <span class="{{colorForReady playerId}}">{{#if isReady playerId}}(ready){{else}}(not ready){{/if}}</span>{{#if isPlayerYou playerId}}(You){{else}}{{#if isHost}}<input type="button" name="kick-player" data-playerid="{{playerId}}" value="Kick Player" />{{/if}}{{/if}}</li>
+				{{/each}}
+			</ul>
+		{{else}}
+			<p>No one has joined yet!</p>
+		{{/if}}
+	</div>
+</template>
+
+<template name="questions">
+	
+	<div class="content">
+		<h3>Question number: {{getCurrentStage}}</h3>
+
+		{{> currentQuestion (getCurrentQuestion)}}
+
+		{{nextQuestion}}
+		{{clearTimer}}
+
+	</div>
+
+</template>
+
+<template name="currentQuestion">
+
+	<h1>{{this.question}}</h1>
+
+	<h2>Time left: {{timeLeft}}s</h2>
+
+	<form id="answer-form">
+		<h3>Select your answer</h3>
+		<div class="answers">
+			{{#each this.answerOptions}}
+				<input id="answer-{{this}}" type="radio" name="answer" value="{{this}}" disabled="{{notPartOfGame}}"><label class="question-answer-label" for="answer-{{this}}">{{this}}</label>
+			{{/each}}
+		</div>
+	</form>
+</template>
+
+<template name="results">
+
+	<div class="content">
+		<h1>This is the results!</h1>
+
+		{{getQuestions}}
+
+		<table class="rwd-table">
+			<thead>
+				<tr>
+					<th>Questions:</th>
+					<th>Correct answer:</th>
+					{{#each players}}
+						<th>{{name}}</th>
+					{{/each}}
+					<th>Total:</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each questions}}
+					<tr>
+						<td>{{question}}</td>
+						<td>{{answer}}</td>
+						{{#each players}}
+							<td>{{answerForQuestion ../question this}}</td>
+						{{/each}}
+						<td>{{totalCorrectOnQuestion question}}</td>
+					</tr>
+				{{/each}}
+				<tr>
+					<td></td>
+					<td class="total-text">Total:</td>
+					{{#each players}}
+						<td>{{totalCorrectForPlayer this}}</td>
+					{{/each}}
+					<td>{{totalCorrectForGame}}</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<input type="button" name="back-to-lobby" value="Play one more game!" />
+	</div>
+
+</template>
